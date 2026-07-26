@@ -1,0 +1,27 @@
+includes:
+    - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+
+parameters:
+    level: 5
+    paths:
+        - src/
+        - tests/
+    
+    # Exclude files that are not ready for strict analysis
+    excludePaths:
+        analyse:
+            - class/*
+            - www/*
+            - api/*
+            - brewsession_realize.php
+    
+    # Dolibarr global variables
+    globals:
+        MAIN_DB_PREFIX: string
+        DOL_DOCUMENT_ROOT: string
+    
+    # Ignore errors for legacy code
+    ignoreErrors:
+        - '#^Cannot access property \$.* on mixed#'
+        - '#^Property \$.* on mixed#'
+        - '#^Call to undefined method#'
