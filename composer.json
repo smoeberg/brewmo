@@ -1,0 +1,14 @@
+{
+    "name": "brewmo/brewmo",
+    "description": "Brewery Management System Module for Dolibarr ERP/CRM",
+    "type": "dolibarr-module",
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "BrewMo\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1"
+    }
+}
