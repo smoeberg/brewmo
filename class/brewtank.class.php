@@ -27,21 +27,24 @@ class BrewTank extends CommonObject
     {
         $this->db->begin();
 
+        // Bruger prepared statements for at forhindre SQL Injection
         $sql = "INSERT INTO ".$this->db->prefix().$this->table_element."(";
         $sql .= "entity, ref, label, capacity_l, tank_type, location, is_active, note_public, note_private";
-        $sql .= ") VALUES (";
-        $sql .= (int) getEntity($this->table_element).", ";
-        $sql .= "'".$this->db->escape($this->ref)."', ";
-        $sql .= "'".$this->db->escape($this->label)."', ";
-        $sql .= (float) $this->capacity_l.", ";
-        $sql .= "'".$this->db->escape($this->tank_type)."', ";
-        $sql .= "'".$this->db->escape($this->location)."', ";
-        $sql .= (int) $this->is_active.", ";
-        $sql .= "'".$this->db->escape($this->note_public)."', ";
-        $sql .= "'".$this->db->escape($this->note_private)."'";
-        $sql .= ")";
+        $sql .= ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        if (!$this->db->query($sql)) {
+        $params = array(
+            (int) getEntity($this->table_element),
+            $this->ref,
+            $this->label,
+            (float) $this->capacity_l,
+            $this->tank_type,
+            $this->location,
+            (int) $this->is_active,
+            $this->note_public,
+            $this->note_private
+        );
+
+        if (!$this->db->query($sql, $params)) {
             $this->error = $this->db->lasterror();
             $this->db->rollback();
             return -1;
@@ -54,14 +57,16 @@ class BrewTank extends CommonObject
 
     public function fetch($id, $ref = '')
     {
-        $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ";
+        // Bruger prepared statements for at forhindre SQL Injection
         if ($id > 0) {
-            $sql .= "rowid = ".((int) $id);
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+            $params = array((int) $id);
         } else {
-            $sql .= "ref = '".$this->db->escape($ref)."'";
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ref = ?";
+            $params = array($ref);
         }
 
-        $resql = $this->db->query($sql);
+        $resql = $this->db->query($sql, $params);
         if (!$resql || !$this->db->num_rows($resql)) return 0;
 
         $obj = $this->db->fetch_object($resql);
@@ -74,6 +79,47 @@ class BrewTank extends CommonObject
         $this->is_active   = $obj->is_active;
         $this->note_public = $obj->note_public;
         $this->note_private= $obj->note_private;
+
+        return 1;
+    }
+
+    public function update($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "UPDATE ".$this->db->prefix().$this->table_element." SET";
+        $sql .= " ref = ?, label = ?, capacity_l = ?, tank_type = ?, location = ?, is_active = ?, note_public = ?, note_private = ?";
+        $sql .= " WHERE rowid = ?";
+
+        $params = array(
+            $this->ref,
+            $this->label,
+            (float) $this->capacity_l,
+            $this->tank_type,
+            $this->location,
+            (int) $this->is_active,
+            $this->note_public,
+            $this->note_private,
+            (int) $this->id
+        );
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
+
+        return 1;
+    }
+
+    public function delete($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "DELETE FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+        $params = array((int) $this->id);
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
 
         return 1;
     }
