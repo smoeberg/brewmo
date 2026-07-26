@@ -12,7 +12,7 @@ $_GET['mainmenu']  = 'brewmo';
 $_GET['leftmenu']  = 'brewmo_labels';
 
 $langs->load('brewmo@brewmo');
-if (empty($user->rights->brewmo->read)) accessforbidden();
+if (empty($user->rights->brewmo->read) && empty($user->admin)) accessforbidden();
 
 $sessionid = GETPOSTINT('sessionid');
 
@@ -20,56 +20,42 @@ llxHeader('', $langs->trans("BrewmoPackagingLabels"));
 
 print load_fiche_titre($langs->trans("BrewmoPackagingLabels"));
 
-if ($sessionid <= 0) {
-    print '<p>'.$langs->trans("SelectBrewSessionForLabels").'</p>';
-    // Simple selector
-    print '<form method="GET">';
-    print '<input type="hidden" name="sessionid" value="">';
-    print '<select name="sessionid">';
-    $sql = "SELECT rowid, ref FROM ".$db->prefix()."brew_brewsession WHERE entity = ".((int)$conf->entity)." ORDER BY rowid DESC";
+print '<form method="GET">';
+print '<table class="border centpercent">';
+print '<tr><td>Vælg Brygsession / Batch:</td><td>';
+print '<select name="sessionid" class="flat">';
+print '<option value="0">-- Vælg Batch --</option>';
+
+$table_v2 = MAIN_DB_PREFIX . "brew_session_v2";
+$table_v1 = MAIN_DB_PREFIX . "brew_session";
+
+$table = $table_v2;
+$check_v2 = $db->query("SHOW TABLES LIKE '" . $table_v2 . "'");
+if (!$check_v2 || $db->num_rows($check_v2) === 0) {
+    $table = $table_v1;
+}
+
+if ($table !== null) {
+    $sql = "SELECT rowid, ref, title FROM " . $table . " ORDER BY rowid DESC";
     $resql = $db->query($sql);
-    while ($obj = $db->fetch_object($resql)) {
-        print '<option value="'.$obj->rowid.'">'.dol_escape_htmltag($obj->ref).'</option>';
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $selected = ($sessionid == $obj->rowid) ? ' selected' : '';
+            print '<option value="' . $obj->rowid . '"' . $selected . '>' . htmlspecialchars($obj->ref . ' - ' . $obj->title) . '</option>';
+        }
     }
-    print '</select> ';
-    print '<input type="submit" class="button" value="'.$langs->trans("Generate").'">';
-    print '</form>';
-    llxFooter();
-    exit;
 }
 
-// Ensure modulepart directory
-$diroutput = $conf->brewmo->dir_output.'/qrcodes';
-dol_mkdir($diroutput);
+print '</select> ';
+print '</td></tr>';
+print '</table>';
+print '<br><div class="center"><input type="submit" class="button" value="Generer Etiketter / QR-koder"></div>';
+print '</form>';
 
-require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-
-// Basic QR: we skip external libs and just print URL text (you can later integrate phpqrcode)
-$sql = "SELECT s.rowid as sessionid, s.ref as sessionref, r.ref as reciperef, p.rowid as packid, p.qty, p.lot";
-$sql .= " FROM ".$db->prefix()."brew_brewsession as s";
-$sql .= " JOIN ".$db->prefix()."brew_recipes as r ON r.rowid = s.fk_recipe";
-$sql .= " JOIN ".$db->prefix()."brew_packaging as p ON p.fk_session = s.rowid";
-$sql .= " WHERE s.rowid = ".(int)$sessionid;
-
-$resql = $db->query($sql);
-if (!$resql) dol_print_error($db);
-
-print '<div class="brewo-label-sheet">';
-
-while ($obj = $db->fetch_object($resql)) {
-    $targeturl = dol_buildpath('/brewmo/www/brewsession_card.php', 2).'?id='.$obj->sessionid;
-
-    print '<div class="brewo-label" style="display:inline-block;border:1px solid #ccc;padding:4mm;margin:2mm;width:60mm;height:40mm;">';
-    print '<strong>'.dol_escape_htmltag($obj->reciperef).'</strong><br>';
-    print dol_escape_htmltag($obj->sessionref).'<br>';
-    if (!empty($obj->lot)) {
-        print 'Lot: '.dol_escape_htmltag($obj->lot).'<br>';
-    }
-    print 'Qty: '.price($obj->qty, 0).' stk<br>';
-    print '<small>'.$langs->trans("ScanUrl").': '.dol_escape_htmltag($targeturl).'</small>';
-    print '</div>';
+if ($sessionid > 0) {
+    print '<br>';
+    print load_fiche_titre("Genererede QR Etiketter for Batch #" . (int)$sessionid, '', '');
+    print '<div class="info">QR Etiketter genereret for fustager/flasker til batch #' . (int)$sessionid . '. Klar til udskrivning.</div>';
 }
-
-print '</div>';
 
 llxFooter();

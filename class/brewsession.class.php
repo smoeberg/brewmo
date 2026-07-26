@@ -34,23 +34,25 @@ class BrewmoBrewSession extends CommonObject
             $this->ref = 'B'.date('ymdHis');
         }
 
+        // Bruger prepared statements for at forhindre SQL Injection
         $sql = "INSERT INTO ".$this->db->prefix().$this->table_element."(";
         $sql .= "entity, ref, fk_recipe, fk_tank, status, volume_l, note_public, note_private, datec, date_start, date_end";
-        $sql .= ") VALUES (";
-        $sql .= (int) getEntity($this->table_element).", ";
-        $sql .= "'".$this->db->escape($this->ref)."', ";
-        $sql .= (int) $this->fk_recipe.", ";
-        $sql .= ($this->fk_tank > 0 ? (int) $this->fk_tank : "NULL").", ";
-        $sql .= (int) $this->status.", ";
-        $sql .= ($this->volume_l !== null ? (float) $this->volume_l : "NULL").", ";
-        $sql .= "'".$this->db->escape($this->note_public)."', ";
-        $sql .= "'".$this->db->escape($this->note_private)."', ";
-        $sql .= "NOW(), ";
-        $sql .= ($this->date_start ? "'".$this->db->idate($this->date_start)."'" : "NULL").", ";
-        $sql .= ($this->date_end   ? "'".$this->db->idate($this->date_end)."'"   : "NULL");
-        $sql .= ")";
+        $sql .= ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
 
-        if (!$this->db->query($sql)) {
+        $params = array(
+            (int) getEntity($this->table_element),
+            $this->ref,
+            (int) $this->fk_recipe,
+            $this->fk_tank > 0 ? (int) $this->fk_tank : null,
+            (int) $this->status,
+            $this->volume_l !== null ? (float) $this->volume_l : null,
+            $this->note_public,
+            $this->note_private,
+            $this->date_start ? $this->db->idate($this->date_start) : null,
+            $this->date_end ? $this->db->idate($this->date_end) : null
+        );
+
+        if (!$this->db->query($sql, $params)) {
             $this->error = $this->db->lasterror();
             $this->db->rollback();
             return -1;
@@ -64,14 +66,16 @@ class BrewmoBrewSession extends CommonObject
 
     public function fetch($id, $ref = '')
     {
-        $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ";
+        // Bruger prepared statements for at forhindre SQL Injection
         if ($id > 0) {
-            $sql .= "rowid = ".((int) $id);
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+            $params = array((int) $id);
         } else {
-            $sql .= "ref = '".$this->db->escape($ref)."'";
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ref = ?";
+            $params = array($ref);
         }
 
-        $resql = $this->db->query($sql);
+        $resql = $this->db->query($sql, $params);
         if (!$resql || !$this->db->num_rows($resql)) return 0;
 
         $obj = $this->db->fetch_object($resql);
@@ -85,6 +89,48 @@ class BrewmoBrewSession extends CommonObject
         $this->note_private= $obj->note_private;
         $this->date_start  = $this->db->jdate($obj->date_start);
         $this->date_end    = $this->db->jdate($obj->date_end);
+
+        return 1;
+    }
+
+    public function update($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "UPDATE ".$this->db->prefix().$this->table_element." SET";
+        $sql .= " ref = ?, fk_recipe = ?, fk_tank = ?, status = ?, volume_l = ?, note_public = ?, note_private = ?, date_start = ?, date_end = ?";
+        $sql .= " WHERE rowid = ?";
+
+        $params = array(
+            $this->ref,
+            (int) $this->fk_recipe,
+            $this->fk_tank > 0 ? (int) $this->fk_tank : null,
+            (int) $this->status,
+            $this->volume_l !== null ? (float) $this->volume_l : null,
+            $this->note_public,
+            $this->note_private,
+            $this->date_start ? $this->db->idate($this->date_start) : null,
+            $this->date_end ? $this->db->idate($this->date_end) : null,
+            (int) $this->id
+        );
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
+
+        return 1;
+    }
+
+    public function delete($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "DELETE FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+        $params = array((int) $this->id);
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
 
         return 1;
     }

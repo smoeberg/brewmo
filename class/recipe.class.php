@@ -29,24 +29,26 @@ class BrewmoRecipe extends CommonObject
     {
         $this->db->begin();
 
+        // Bruger prepared statements for at forhindre SQL Injection
         $sql = "INSERT INTO ".$this->db->prefix().$this->table_element."(";
         $sql .= "entity, ref, label, fk_product, abv, ibu, color_ebc, og_sg, fg_sg, batch_volume_l, description, datec";
-        $sql .= ") VALUES (";
-        $sql .= (int) getEntity($this->table_element).", ";
-        $sql .= "'".$this->db->escape($this->ref)."', ";
-        $sql .= "'".$this->db->escape($this->label)."', ";
-        $sql .= ($this->fk_product > 0 ? (int) $this->fk_product : "NULL").", ";
-        $sql .= ($this->abv !== null ? (float) $this->abv : "NULL").", ";
-        $sql .= ($this->ibu !== null ? (float) $this->ibu : "NULL").", ";
-        $sql .= ($this->color_ebc !== null ? (float) $this->color_ebc : "NULL").", ";
-        $sql .= ($this->og_sg !== null ? (float) $this->og_sg : "NULL").", ";
-        $sql .= ($this->fg_sg !== null ? (float) $this->fg_sg : "NULL").", ";
-        $sql .= ($this->batch_volume_l !== null ? (float) $this->batch_volume_l : "NULL").", ";
-        $sql .= "'".$this->db->escape($this->description)."', ";
-        $sql .= "NOW()";
-        $sql .= ")";
+        $sql .= ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
-        if (!$this->db->query($sql)) {
+        $params = array(
+            (int) getEntity($this->table_element),
+            $this->ref,
+            $this->label,
+            $this->fk_product > 0 ? (int) $this->fk_product : null,
+            $this->abv !== null ? (float) $this->abv : null,
+            $this->ibu !== null ? (float) $this->ibu : null,
+            $this->color_ebc !== null ? (float) $this->color_ebc : null,
+            $this->og_sg !== null ? (float) $this->og_sg : null,
+            $this->fg_sg !== null ? (float) $this->fg_sg : null,
+            $this->batch_volume_l !== null ? (float) $this->batch_volume_l : null,
+            $this->description
+        );
+
+        if (!$this->db->query($sql, $params)) {
             $this->error = $this->db->lasterror();
             $this->db->rollback();
             return -1;
@@ -60,14 +62,16 @@ class BrewmoRecipe extends CommonObject
 
     public function fetch($id, $ref = '')
     {
-        $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ";
+        // Bruger prepared statements for at forhindre SQL Injection
         if ($id > 0) {
-            $sql .= "rowid = ".((int) $id);
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+            $params = array((int) $id);
         } else {
-            $sql .= "ref = '".$this->db->escape($ref)."'";
+            $sql = "SELECT * FROM ".$this->db->prefix().$this->table_element." WHERE ref = ?";
+            $params = array($ref);
         }
 
-        $resql = $this->db->query($sql);
+        $resql = $this->db->query($sql, $params);
         if (!$resql || !$this->db->num_rows($resql)) return 0;
 
         $obj = $this->db->fetch_object($resql);
@@ -82,6 +86,49 @@ class BrewmoRecipe extends CommonObject
         $this->fg_sg          = $obj->fg_sg;
         $this->batch_volume_l = $obj->batch_volume_l;
         $this->description    = $obj->description;
+
+        return 1;
+    }
+
+    public function update($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "UPDATE ".$this->db->prefix().$this->table_element." SET";
+        $sql .= " ref = ?, label = ?, fk_product = ?, abv = ?, ibu = ?, color_ebc = ?, og_sg = ?, fg_sg = ?, batch_volume_l = ?, description = ?";
+        $sql .= " WHERE rowid = ?";
+
+        $params = array(
+            $this->ref,
+            $this->label,
+            $this->fk_product > 0 ? (int) $this->fk_product : null,
+            $this->abv !== null ? (float) $this->abv : null,
+            $this->ibu !== null ? (float) $this->ibu : null,
+            $this->color_ebc !== null ? (float) $this->color_ebc : null,
+            $this->og_sg !== null ? (float) $this->og_sg : null,
+            $this->fg_sg !== null ? (float) $this->fg_sg : null,
+            $this->batch_volume_l !== null ? (float) $this->batch_volume_l : null,
+            $this->description,
+            (int) $this->id
+        );
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
+
+        return 1;
+    }
+
+    public function delete($user, $notrigger = false)
+    {
+        // Bruger prepared statements for at forhindre SQL Injection
+        $sql = "DELETE FROM ".$this->db->prefix().$this->table_element." WHERE rowid = ?";
+        $params = array((int) $this->id);
+
+        if (!$this->db->query($sql, $params)) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
 
         return 1;
     }

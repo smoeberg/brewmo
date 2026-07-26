@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<psalm>
+    <projectFiles>
+        <directory name="src" />
+        <directory name="tests" />
+        <ignoreFiles>
+            <file name="class/*" />
+            <file name="www/*" />
+            <file name="api/*" />
+            <file name="brewsession_realize.php" />
+        </ignoreFiles>
+    </projectFiles>
+    
+    <config>
+        <errorLevel type="int" value="1" />
+        <resolveFromConfigFile type="bool" value="true" />
+        <cacheDirectory type="string" value=".psalm-cache" />
+        
+        <!-- Dolibarr global variables -->
+        <globals>
+            <global name="MAIN_DB_PREFIX" type="string" />
+            <global name="DOL_DOCUMENT_ROOT" type="string" />
+        </globals>
+    </config>
+    
+    <plugins>
+        <!-- No plugins needed for now -->
+    </plugins>
+</psalm>
