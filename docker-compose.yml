@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PHP service for development
+  php:
+    image: php:8.1-apache
+    container_name: brewmo-php
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html/custom/brewmo
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - brewmo-network
+
+  # MySQL service
+  mysql:
+    image: mysql:8.0
+    container_name: brewmo-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: dolibarr
+      MYSQL_USER: dolibarr
+      MYSQL_PASSWORD: dolibarrpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - brewmo-network
+
+  # Dolibarr service (optional - for full integration testing)
+  dolibarr:
+    image: dolibarr/dolibarr:latest
+    container_name: brewmo-dolibarr
+    ports:
+      - "8000:80"
+    environment:
+      - DOLI_DB_HOST=mysql
+      - DOLI_DB_NAME=dolibarr
+      - DOLI_DB_USER=dolibarr
+      - DOLI_DB_PASSWORD=dolibarrpassword
+      - DOLI_DB_PORT=3306
+    depends_on:
+      - mysql
+    volumes:
+      - dolibarr-data:/var/www/html
+    networks:
+      - brewmo-network
+
+  # PHPMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: brewmo-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    depends_on:
+      - mysql
+    networks:
+      - brewmo-network
+
+volumes:
+  mysql-data:
+  dolibarr-data:
+
+networks:
+  brewmo-network:
+    driver: bridge

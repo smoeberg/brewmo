@@ -1,0 +1,52 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches: [ main, develop, vibe/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: dolibarr
+          MYSQL_USER: dolibarr
+          MYSQL_PASSWORD: dolibarr
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit
+
+      - name: Run PHPStan static analysis
+        run: |
+          composer require --dev phpstan/phpstan:^1.0
+          vendor/bin/phpstan analyse src/ --level=5
+
+      - name: Run Psalm static analysis
+        run: |
+          composer require --dev vimeo/psalm:^5.0
+          vendor/bin/psalm --init
+          vendor/bin/psalm src/
