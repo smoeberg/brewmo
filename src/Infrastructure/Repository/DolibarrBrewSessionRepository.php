@@ -4,14 +4,10 @@ namespace BrewMo\Infrastructure\Repository;
 
 use BrewMo\Domain\BrewSession\BrewSession;
 use BrewMo\Domain\BrewSession\BrewSessionState;
-use BrewMo\Domain\Repository\BrewSessionRepositoryInterface;
+use BrewMo\Domain\BrewSession\BrewSessionRepositoryInterface;
 use RuntimeException;
+use InvalidArgumentException;
 
-/**
- * Dolibarr Persistence implementation of BrewSessionRepositoryInterface.
- * Bridges DDD entities with Dolibarr SQL database.
- * Uses prepared statements for SQL Injection protection.
- */
 class DolibarrBrewSessionRepository implements BrewSessionRepositoryInterface
 {
     private object $db;
@@ -23,232 +19,88 @@ class DolibarrBrewSessionRepository implements BrewSessionRepositoryInterface
 
     public function findById(int $id): ?BrewSession
     {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE rowid = ?";
+        $table = MAIN_DB_PREFIX . "brew_session_v2";
+        $sql = "SELECT rowid, ref, title, fk_recipe, fk_vessel, state, planned_volume_liters, lot_number ";
+        $sql .= "FROM " . $table . " WHERE rowid = " . $id;
 
-        $res = $this->db->query($sql, [(int)$id]);
-        if (!$res || $this->db->num_rows($res) === 0) {
-            return null;
-        }
-
-        $obj = $this->db->fetch_object($res);
-        return new BrewSession(
-            (int)$obj->rowid,
-            $obj->ref,
-            $obj->title,
-            (int)$obj->fk_recipe,
-            (float)$obj->planned_volume_liters,
-            BrewSessionState::from($obj->state),
-            $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-            $obj->lot_number,
-            $obj->date_start,
-            $obj->date_end
-        );
-    }
-
-    public function findByRef(string $ref): ?BrewSession
-    {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE ref = ?";
-
-        $res = $this->db->query($sql, [$ref]);
-        if (!$res || $this->db->num_rows($res) === 0) {
-            return null;
-        }
-
-        $obj = $this->db->fetch_object($res);
-        return new BrewSession(
-            (int)$obj->rowid,
-            $obj->ref,
-            $obj->title,
-            (int)$obj->fk_recipe,
-            (float)$obj->planned_volume_liters,
-            BrewSessionState::from($obj->state),
-            $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-            $obj->lot_number,
-            $obj->date_start,
-            $obj->date_end
-        );
-    }
-
-    public function findByRecipeId(int $recipeId): array
-    {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE fk_recipe = ? ORDER BY date_start DESC";
-
-        $res = $this->db->query($sql, [(int)$recipeId]);
-        if (!$res) {
-            return [];
-        }
-
-        $sessions = [];
-        while ($obj = $this->db->fetch_object($res)) {
-            $sessions[] = new BrewSession(
-                (int)$obj->rowid,
-                $obj->ref,
-                $obj->title,
-                (int)$obj->fk_recipe,
-                (float)$obj->planned_volume_liters,
-                BrewSessionState::from($obj->state),
-                $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-                $obj->lot_number,
-                $obj->date_start,
-                $obj->date_end
-            );
-        }
-
-        return $sessions;
-    }
-
-    public function findByState(BrewSessionState $state): array
-    {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE state = ? ORDER BY date_start DESC";
-
-        $res = $this->db->query($sql, [$state->value]);
-        if (!$res) {
-            return [];
-        }
-
-        $sessions = [];
-        while ($obj = $this->db->fetch_object($res)) {
-            $sessions[] = new BrewSession(
-                (int)$obj->rowid,
-                $obj->ref,
-                $obj->title,
-                (int)$obj->fk_recipe,
-                (float)$obj->planned_volume_liters,
-                BrewSessionState::from($obj->state),
-                $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-                $obj->lot_number,
-                $obj->date_start,
-                $obj->date_end
-            );
-        }
-
-        return $sessions;
-    }
-
-    public function findByVesselId(int $vesselId): array
-    {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE fk_vessel = ? ORDER BY date_start DESC";
-
-        $res = $this->db->query($sql, [(int)$vesselId]);
-        if (!$res) {
-            return [];
-        }
-
-        $sessions = [];
-        while ($obj = $this->db->fetch_object($res)) {
-            $sessions[] = new BrewSession(
-                (int)$obj->rowid,
-                $obj->ref,
-                $obj->title,
-                (int)$obj->fk_recipe,
-                (float)$obj->planned_volume_liters,
-                BrewSessionState::from($obj->state),
-                $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-                $obj->lot_number,
-                $obj->date_start,
-                $obj->date_end
-            );
-        }
-
-        return $sessions;
-    }
-
-    public function findAll(): array
-    {
-        $sql = "SELECT rowid, ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number, date_start, date_end ";
-        $sql .= "FROM " . MAIN_DB_PREFIX . "brew_session_v2 ORDER BY date_start DESC";
-
-        $res = $this->db->query($sql);
-        if (!$res) {
-            return [];
-        }
-
-        $sessions = [];
-        while ($obj = $this->db->fetch_object($res)) {
-            $sessions[] = new BrewSession(
-                (int)$obj->rowid,
-                $obj->ref,
-                $obj->title,
-                (int)$obj->fk_recipe,
-                (float)$obj->planned_volume_liters,
-                BrewSessionState::from($obj->state),
-                $obj->fk_vessel ? (int)$obj->fk_vessel : null,
-                $obj->lot_number,
-                $obj->date_start,
-                $obj->date_end
-            );
-        }
-
-        return $sessions;
-    }
-
-    public function save(BrewSession $session): BrewSession
-    {
-        if ($session->getId() === null) {
-            // INSERT
-            $sql = "INSERT INTO " . MAIN_DB_PREFIX . "brew_session_v2 ";
-            $sql .= "(ref, title, fk_recipe, state, planned_volume_liters, fk_vessel, lot_number) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-            $params = [
-                $session->getRef(),
-                $session->getTitle(),
-                (int)$session->getRecipeId(),
-                $session->getState()->value,
-                (float)$session->getPlannedVolumeLiters(),
-                $session->getVesselId() ? (int)$session->getVesselId() : null,
-                $session->getLotNumber()
-            ];
-
-            $res = $this->db->query($sql, $params);
-            if (!$res) {
-                throw new RuntimeException("Database error creating BrewSession: " . $this->db->lasterror());
-            }
-
-            $insertedId = $this->db->last_insert_id(MAIN_DB_PREFIX . "brew_session_v2");
+        $resql = $this->db->query($sql);
+        if ($resql && $this->db->num_rows($resql) > 0) {
+            $obj = $this->db->fetch_object($resql);
             return new BrewSession(
-                $insertedId,
-                $session->getRef(),
-                $session->getTitle(),
-                $session->getRecipeId(),
-                $session->getPlannedVolumeLiters(),
-                $session->getState(),
-                $session->getVesselId(),
-                $session->getLotNumber()
+                (int) $obj->rowid,
+                $obj->ref,
+                $obj->title,
+                BrewSessionState::from($obj->state),
+                (float) $obj->planned_volume_liters,
+                $obj->lot_number,
+                $obj->fk_recipe ? (int) $obj->fk_recipe : null,
+                $obj->fk_vessel ? (int) $obj->fk_vessel : null
             );
-        } else {
-            // UPDATE
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "brew_session_v2 SET ";
-            $sql .= "ref = ?, title = ?, fk_recipe = ?, state = ?, planned_volume_liters = ?, fk_vessel = ?, lot_number = ?";
-            $sql .= " WHERE rowid = ?";
+        }
 
-            $params = [
-                $session->getRef(),
-                $session->getTitle(),
-                (int)$session->getRecipeId(),
-                $session->getState()->value,
-                (float)$session->getPlannedVolumeLiters(),
-                $session->getVesselId() ? (int)$session->getVesselId() : null,
-                $session->getLotNumber(),
-                (int)$session->getId()
-            ];
+        return null;
+    }
 
-            $res = $this->db->query($sql, $params);
-            if (!$res) {
-                throw new RuntimeException("Database error updating BrewSession: " . $this->db->lasterror());
+    public function save(BrewSession $session): void
+    {
+        $table = MAIN_DB_PREFIX . "brew_session_v2";
+        $this->db->begin();
+
+        try {
+            if ($session->getId() === null) {
+                // Insert
+                $sql = "INSERT INTO " . $table . " (entity, ref, title, fk_recipe, fk_vessel, state, planned_volume_liters, lot_number, datec) ";
+                $sql .= "VALUES (";
+                $sql .= "1, ";
+                $sql .= "'" . $this->db->escape($session->getRef()) . "', ";
+                $sql .= "'" . $this->db->escape($session->getTitle()) . "', ";
+                $sql .= ($session->getRecipeId() ? $session->getRecipeId() : "NULL") . ", ";
+                $sql .= ($session->getVesselId() ? $session->getVesselId() : "NULL") . ", ";
+                $sql .= "'" . $this->db->escape($session->getState()->value) . "', ";
+                $sql .= $session->getPlannedVolumeLiters() . ", ";
+                $sql .= ($session->getLotNumber() ? "'" . $this->db->escape($session->getLotNumber()) . "'" : "NULL") . ", ";
+                $sql .= "NOW()";
+                $sql .= ")";
+            } else {
+                // Update with atomic state transition
+                $sql = "UPDATE " . $table . " SET ";
+                $sql .= "title = '" . $this->db->escape($session->getTitle()) . "', ";
+                $sql .= "state = '" . $this->db->escape($session->getState()->value) . "', ";
+                $sql .= "planned_volume_liters = " . $session->getPlannedVolumeLiters() . ", ";
+                $sql .= "fk_vessel = " . ($session->getVesselId() ? $session->getVesselId() : "NULL") . ", ";
+                $sql .= "lot_number = " . ($session->getLotNumber() ? "'" . $this->db->escape($session->getLotNumber()) . "'" : "NULL") . " ";
+                $sql .= "WHERE rowid = " . $session->getId();
             }
 
-            return $session;
+            $resql = $this->db->query($sql);
+            if (!$resql) {
+                throw new RuntimeException("Database error saving BrewSession: " . $this->db->lasterror());
+            }
+
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollback();
+            throw $e;
         }
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
-        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "brew_session_v2 WHERE rowid = ?";
-        return (bool)$this->db->query($sql, [(int)$id]);
+        $table = MAIN_DB_PREFIX . "brew_session_v2";
+        $this->db->begin();
+
+        try {
+            $sql = "DELETE FROM " . $table . " WHERE rowid = " . $id;
+            $resql = $this->db->query($sql);
+
+            if (!$resql) {
+                throw new RuntimeException("Database error deleting BrewSession: " . $this->db->lasterror());
+            }
+
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            $this->db->rollback();
+            throw $e;
+        }
     }
 }

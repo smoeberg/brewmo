@@ -2,33 +2,42 @@
 
 namespace BrewMo\Domain\BrewSession;
 
-/**
- * Enumeration of BrewSession states for the BrewMo 2.0 State Machine.
- */
 enum BrewSessionState: string
 {
-    case DRAFT = 'DRAFT';
-    case PLANNED = 'PLANNED';
-    case MASHING = 'MASHING';
-    case BOILING = 'BOILING';
-    case FERMENTING = 'FERMENTING';
-    case PACKAGING = 'PACKAGING';
-    case COMPLETED = 'COMPLETED';
-    case CANCELLED = 'CANCELLED';
+    case DRAFT        = 'DRAFT';
+    case PLANNED      = 'PLANNED';
+    case MASHING      = 'MASHING';
+    case BOILING      = 'BOILING';
+    case FERMENTING   = 'FERMENTING';
+    case CONDITIONING = 'CONDITIONING';
+    case PACKAGING   = 'PACKAGING';
+    case COMPLETED   = 'COMPLETED';
+    case CANCELLED   = 'CANCELLED';
 
     /**
-     * Determine if a state transition to $newState is allowed.
+     * Allowed state transitions (Rigid MES Workflow Engine)
      */
-    public function canTransitionTo(BrewSessionState $newState): bool
+    public function canTransitionTo(self $target): bool
     {
+        if ($this === $target) {
+            return true;
+        }
+
+        // CANCELLED is a terminal state, or can be reached from early phases
+        if ($target === self::CANCELLED) {
+            return in_array($this, [self::DRAFT, self::PLANNED, self::MASHING, self::BOILING], true);
+        }
+
         return match ($this) {
-            self::DRAFT => in_array($newState, [self::PLANNED, self::CANCELLED]),
-            self::PLANNED => in_array($newState, [self::MASHING, self::CANCELLED]),
-            self::MASHING => in_array($newState, [self::BOILING, self::CANCELLED]),
-            self::BOILING => in_array($newState, [self::FERMENTING, self::CANCELLED]),
-            self::FERMENTING => in_array($newState, [self::PACKAGING, self::CANCELLED]),
-            self::PACKAGING => in_array($newState, [self::COMPLETED, self::CANCELLED]),
-            self::COMPLETED, self::CANCELLED => false,
+            self::DRAFT        => $target === self::PLANNED,
+            self::PLANNED      => $target === self::MASHING,
+            self::MASHING      => $target === self::BOILING,
+            self::BOILING      => $target === self::FERMENTING,
+            self::FERMENTING   => $target === self::CONDITIONING,
+            self::CONDITIONING => $target === self::PACKAGING,
+            self::PACKAGING   => $target === self::COMPLETED,
+            self::COMPLETED   => false, // Terminal state
+            self::CANCELLED   => false, // Terminal state
         };
     }
 }
