@@ -160,7 +160,48 @@ class modBrewmo extends DolibarrModules
 
     public function init($options = '')
     {
-        $sql = array();
+        $sql = array(
+            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_session_v2 (
+                rowid INT AUTO_INCREMENT PRIMARY KEY,
+                ref VARCHAR(64) NOT NULL UNIQUE,
+                title VARCHAR(255) NOT NULL,
+                recipe_id INT NULL,
+                vessel_id INT NULL,
+                state VARCHAR(32) NOT NULL DEFAULT 'DRAFT',
+                planned_volume_liters DOUBLE(24,8) NOT NULL DEFAULT 0,
+                lot_number VARCHAR(64) NULL,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB;",
+            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_recipe (
+                rowid INT AUTO_INCREMENT PRIMARY KEY,
+                ref VARCHAR(64) NOT NULL UNIQUE,
+                title VARCHAR(255) NOT NULL,
+                target_batch_size DOUBLE(24,8) NOT NULL DEFAULT 0,
+                og DOUBLE(24,8) NOT NULL DEFAULT 1.050,
+                fg DOUBLE(24,8) NOT NULL DEFAULT 1.010,
+                ibu DOUBLE(24,8) NOT NULL DEFAULT 0,
+                ebc DOUBLE(24,8) NOT NULL DEFAULT 0
+            ) ENGINE=InnoDB;",
+            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_qc_log (
+                rowid INT AUTO_INCREMENT PRIMARY KEY,
+                brew_session_id INT NOT NULL,
+                measurement_type VARCHAR(32) NOT NULL,
+                value DOUBLE(24,8) NOT NULL,
+                unit VARCHAR(16) NOT NULL,
+                recorded_by VARCHAR(128) NOT NULL,
+                recorded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB;",
+            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_container (
+                rowid INT AUTO_INCREMENT PRIMARY KEY,
+                barcode VARCHAR(128) NOT NULL UNIQUE,
+                container_type VARCHAR(32) NOT NULL,
+                status VARCHAR(32) NOT NULL DEFAULT 'IN_BREWERY',
+                current_location VARCHAR(255) NULL,
+                thirdparty_id INT NULL,
+                last_scanned_at DATETIME NULL
+            ) ENGINE=InnoDB;"
+        );
         return $this->_init($sql, $options);
     }
 
