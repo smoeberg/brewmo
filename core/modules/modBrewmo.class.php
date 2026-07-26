@@ -26,12 +26,12 @@ class modBrewmo extends DolibarrModules
 
         // Directory name
         $this->module_parts = array(
-            'triggers' => 1,
+            'triggers' => 0,
             'css' => array(),
             'js' => array(),
         );
 
-        $this->dirs = array('/brewmo');
+        $this->dirs = array();
         $this->config_page_url = array();
 
         $this->rights = array();
