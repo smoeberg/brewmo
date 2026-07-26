@@ -24,7 +24,7 @@ class modBrewmo extends DolibarrModules
         $this->special = 0;
         $this->picto = 'generic';
 
-        // Directory name
+        // Directory name & Module parts
         $this->module_parts = array(
             'triggers' => 0,
             'css' => array(),
@@ -58,30 +58,30 @@ class modBrewmo extends DolibarrModules
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'delete';
 
-        // Menus
+        // Menus definition
         $this->menu = array();
         $m = 0;
 
-        // Top Menu
+        // Top Menu Entry
         $this->menu[$m] = array(
-            'fk_menu' => 0,
+            'fk_menu' => 'fk_mainmenu=home',
             'type' => 'top',
             'titre' => 'BrewMo',
             'mainmenu' => 'brewmo',
             'leftmenu' => '',
             'url' => '/custom/brewmo/www/brewsession_list.php',
             'langs' => 'brewmo@brewmo',
-            'position' => 100,
+            'position' => 1000,
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
         $m++;
 
         // Left Menu - Brew Sessions
         $this->menu[$m] = array(
-            'fk_menu' => 'r=0',
+            'fk_menu' => 'fk_mainmenu=brewmo',
             'type' => 'left',
             'titre' => 'Brew Sessions',
             'mainmenu' => 'brewmo',
@@ -92,13 +92,13 @@ class modBrewmo extends DolibarrModules
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
         $m++;
 
         // Left Menu - Recipes
         $this->menu[$m] = array(
-            'fk_menu' => 'r=0',
+            'fk_menu' => 'fk_mainmenu=brewmo',
             'type' => 'left',
             'titre' => 'Recipes',
             'mainmenu' => 'brewmo',
@@ -109,13 +109,13 @@ class modBrewmo extends DolibarrModules
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
         $m++;
 
         // Left Menu - Tanks
         $this->menu[$m] = array(
-            'fk_menu' => 'r=0',
+            'fk_menu' => 'fk_mainmenu=brewmo',
             'type' => 'left',
             'titre' => 'Tanks / Vessels',
             'mainmenu' => 'brewmo',
@@ -126,13 +126,13 @@ class modBrewmo extends DolibarrModules
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
         $m++;
 
         // Left Menu - MRP
         $this->menu[$m] = array(
-            'fk_menu' => 'r=0',
+            'fk_menu' => 'fk_mainmenu=brewmo',
             'type' => 'left',
             'titre' => 'MRP Calculation',
             'mainmenu' => 'brewmo',
@@ -143,13 +143,13 @@ class modBrewmo extends DolibarrModules
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
         $m++;
 
         // Left Menu - Packaging Labels
         $this->menu[$m] = array(
-            'fk_menu' => 'r=0',
+            'fk_menu' => 'fk_mainmenu=brewmo',
             'type' => 'left',
             'titre' => 'Packaging Labels',
             'mainmenu' => 'brewmo',
@@ -160,7 +160,7 @@ class modBrewmo extends DolibarrModules
             'enabled' => '1',
             'perms' => '1',
             'target' => '',
-            'user' => 2
+            'user' => 0
         );
     }
 
