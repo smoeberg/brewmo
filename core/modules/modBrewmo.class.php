@@ -72,8 +72,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/brewsession_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 100,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
@@ -89,8 +89,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/brewsession_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 100,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
@@ -106,8 +106,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/recipe_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 101,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
@@ -123,8 +123,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/tank_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 102,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
@@ -140,8 +140,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/mrp_overview.php',
             'langs' => 'brewmo@brewmo',
             'position' => 103,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
@@ -157,8 +157,8 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/packaging_labels.php',
             'langs' => 'brewmo@brewmo',
             'position' => 104,
-            'enabled' => '$conf->brewmo->enabled',
-            'perms' => '$user->rights->brewmo->read',
+            'enabled' => '1',
+            'perms' => '1',
             'target' => '',
             'user' => 2
         );
