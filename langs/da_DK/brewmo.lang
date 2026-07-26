@@ -1,0 +1,18 @@
+# brewmo.lang (da_DK)
+Brewery=Bryggeri
+BreweryDashboard=Bryggeri overblik
+Recipes=Opskrifter
+New=Ny
+Open=Åbn
+RecipeBuilder=Opskrift-bygger
+BrewSessions=Brygsessioner
+BrewSession=Brygsession
+Packaging=Pakning
+BrewmoSetup=Brewmo opsætning
+BatchVolume=Batch-volumen
+Overview=Overblik
+CreateFromRecipe=Opret fra opskrift
+CreateBrewSession=Opret brygsession
+Note=Note
+Start=Start
+Finish=Afslut

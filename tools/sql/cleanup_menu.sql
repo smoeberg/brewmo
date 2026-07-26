@@ -1,0 +1,1 @@
+DELETE FROM llx_menu WHERE module='brewery';

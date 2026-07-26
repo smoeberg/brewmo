@@ -1,0 +1,10 @@
+<?php
+// Tilføj under din eksisterende brewsession_plan.php, lige under mangellisten eller i toppen:
+if (!empty($conf->mrp->enabled)) {
+    print '<div class="center" style="margin-top:12px">';
+    print '<a class="button" href="/custom/brewmo/www/brewsession_mo_create.php?recipe_id='.(int)$rid.'">'.$langs->trans("OpretMO").'</a>';
+    print '</div>';
+} else {
+    print '<div class="warning">'.$langs->trans("MRPNotEnabled").'</div>';
+}
+?>

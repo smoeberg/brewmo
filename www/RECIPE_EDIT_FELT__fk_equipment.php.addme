@@ -1,0 +1,14 @@
+<?php
+// Uddrag/erstatning: felt til valg af produktionsanlæg (fk_equipment) i recipe_edit.php
+// Find placering for felter og indsæt denne blok i jeres 'recipe_edit.php' hvor det passer bedst:
+/*
+print '<tr><td>'.$langs->trans("Produktionsanlæg").'</td><td>';
+print '<select name="fk_equipment">';
+$res=$db->query("SELECT rowid,ref,label FROM ".MAIN_DB_PREFIX."brew_equipment WHERE entity=".(int)$conf->entity." AND enabled=1 ORDER BY rowid DESC");
+if($res) while($o=$db->fetch_object($res)){
+    $sel = ($rec->fk_equipment==$o->rowid?' selected':'');
+    print '<option value="'.$o->rowid.'"'.$sel.'>'.dol_escape_htmltag($o->ref.' - '.$o->label).'</option>';
+}
+print '</select>';
+print '</td></tr>';
+*/
