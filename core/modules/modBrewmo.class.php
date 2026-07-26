@@ -211,3 +211,13 @@ class modBrewmo extends DolibarrModules
         return $this->_remove($sql, $options);
     }
 }
+            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_vessel (
+                rowid INT AUTO_INCREMENT PRIMARY KEY,
+                ref VARCHAR(64) NOT NULL UNIQUE,
+                name VARCHAR(255) NOT NULL,
+                type VARCHAR(32) NOT NULL,
+                capacity_liters DOUBLE(24,8) NOT NULL DEFAULT 0,
+                is_clean TINYINT(1) NOT NULL DEFAULT 1,
+                is_occupied TINYINT(1) NOT NULL DEFAULT 0,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB;"
