@@ -3,10 +3,8 @@
 namespace BrewMo\Domain\Vessel;
 
 use BrewMo\Domain\ValueObject\Volume;
+use RuntimeException;
 
-/**
- * Domain Entity representing a Brewery Tank / Vessel.
- */
 class Vessel
 {
     private ?int $id;
@@ -35,32 +33,76 @@ class Vessel
         $this->isOccupied = $isOccupied;
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getRef(): string { return $this->ref; }
-    public function getName(): string { return $this->name; }
-    public function getType(): VesselType { return $this->type; }
-    public function getCapacity(): Volume { return $this->capacity; }
-    public function isClean(): bool { return $this->isClean; }
-    public function isOccupied(): bool { return $this->isOccupied; }
-
-    public function markAsDirty(): void
+    public function getId(): ?int
     {
-        $this->isClean = false;
+        return $this->id;
     }
 
-    public function markAsClean(): void
+    public function getRef(): string
     {
-        $this->isClean = true;
+        return $this->ref;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getType(): VesselType
+    {
+        return $this->type;
+    }
+
+    public function getCapacity(): Volume
+    {
+        return $this->capacity;
+    }
+
+    public function isClean(): bool
+    {
+        return $this->isClean;
+    }
+
+    public function isOccupied(): bool
+    {
+        return $this->isOccupied;
+    }
+
+    /**
+     * Rich Domain Method: Check if tank can handle planned batch volume
+     */
+    public function canHandleVolume(Volume $plannedVolume): bool
+    {
+        return $plannedVolume->getLiters() <= $this->capacity->getLiters();
+    }
+
+    /**
+     * Rich Domain Method: Check if tank is ready for brewing/fermenting
+     */
+    public function isReadyForUse(): bool
+    {
+        return $this->isClean && !$this->isOccupied;
     }
 
     public function occupy(): void
     {
+        if (!$this->isClean) {
+            throw new RuntimeException("Kan ikke benytte tank '{$this->ref}': Tanken skal rengøres (CIP) først.");
+        }
+        if ($this->isOccupied) {
+            throw new RuntimeException("Tank '{$this->ref}' er allerede optaget af et andet bryg.");
+        }
         $this->isOccupied = true;
     }
 
     public function release(): void
     {
         $this->isOccupied = false;
-        $this->isClean = false; // Requiring CIP after use
+        $this->isClean = false; // Tank automatically becomes dirty after emptying
+    }
+
+    public function markAsClean(): void
+    {
+        $this->isClean = true;
     }
 }
