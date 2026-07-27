@@ -22,7 +22,7 @@ class modBrewmo extends DolibarrModules
         $this->editor_name = 'Rool';
         $this->editor_url = 'https://rool.app';
         $this->special = 0;
-        $this->picto = 'generic';
+        $this->picto = 'object_generic';
 
         // Directory name & Module parts
         $this->module_parts = array(
@@ -72,16 +72,16 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/brewsession_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 1000,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
         $m++;
 
         // Left Menu - Brew Sessions
         $this->menu[$m] = array(
-            'fk_menu' => 'fk_mainmenu=brewmo',
+            'fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'Brew Sessions',
             'mainmenu' => 'brewmo',
@@ -89,16 +89,16 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/brewsession_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 100,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
         $m++;
 
         // Left Menu - Recipes
         $this->menu[$m] = array(
-            'fk_menu' => 'fk_mainmenu=brewmo',
+            'fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'Recipes',
             'mainmenu' => 'brewmo',
@@ -106,16 +106,16 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/recipe_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 101,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
         $m++;
 
         // Left Menu - Tanks
         $this->menu[$m] = array(
-            'fk_menu' => 'fk_mainmenu=brewmo',
+            'fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'Tanks / Vessels',
             'mainmenu' => 'brewmo',
@@ -123,16 +123,16 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/tank_list.php',
             'langs' => 'brewmo@brewmo',
             'position' => 102,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
         $m++;
 
         // Left Menu - MRP
         $this->menu[$m] = array(
-            'fk_menu' => 'fk_mainmenu=brewmo',
+            'fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'MRP Calculation',
             'mainmenu' => 'brewmo',
@@ -140,16 +140,16 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/mrp_overview.php',
             'langs' => 'brewmo@brewmo',
             'position' => 103,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
         $m++;
 
         // Left Menu - Packaging Labels
         $this->menu[$m] = array(
-            'fk_menu' => 'fk_mainmenu=brewmo',
+            'fk_menu' => 'r=0',
             'type' => 'left',
             'titre' => 'Packaging Labels',
             'mainmenu' => 'brewmo',
@@ -157,93 +157,31 @@ class modBrewmo extends DolibarrModules
             'url' => '/custom/brewmo/www/packaging_labels.php',
             'langs' => 'brewmo@brewmo',
             'position' => 104,
-            'enabled' => '1',
-            'perms' => '1',
+            'enabled' => '$conf->brewmo->enabled',
+            'perms' => '$user->rights->brewmo->read',
             'target' => '',
-            'user' => 0
+            'user' => 2
         );
     }
 
     public function init($options = '')
     {
-        $sql = array(
-            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_session_v2 (
-                rowid INT AUTO_INCREMENT PRIMARY KEY,
-                entity INT NOT NULL DEFAULT 1,
-                ref VARCHAR(64) NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                fk_recipe INT NULL,
-                fk_vessel INT NULL,
-                state VARCHAR(32) NOT NULL DEFAULT 'DRAFT',
-                planned_volume_liters DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-                lot_number VARCHAR(64) NULL,
-                datec DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                tms DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                fk_user_creat INT NULL,
-                fk_user_modif INT NULL,
-                CONSTRAINT uk_brew_session_ref UNIQUE (entity, ref)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+        $this->_init(array(), $options);
 
-            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_recipe (
-                rowid INT AUTO_INCREMENT PRIMARY KEY,
-                entity INT NOT NULL DEFAULT 1,
-                ref VARCHAR(64) NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                target_batch_size DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-                og DECIMAL(6,3) NOT NULL DEFAULT 1.050,
-                fg DECIMAL(6,3) NOT NULL DEFAULT 1.010,
-                ibu DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-                ebc DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-                datec DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                tms DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                CONSTRAINT uk_brew_recipe_ref UNIQUE (entity, ref)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+        // Explicitly enable module constant in Dolibarr conf
+        dolibarr_set_const($this->db, "MAIN_MODULE_BREWMO", "1", 'chaine', 0, '', 0);
+        dolibarr_set_const($this->db, "MAIN_MODULE_BREWMO_VERSION", $this->version, 'chaine', 0, '', 0);
 
-            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_vessel (
-                rowid INT AUTO_INCREMENT PRIMARY KEY,
-                entity INT NOT NULL DEFAULT 1,
-                ref VARCHAR(64) NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                type VARCHAR(32) NOT NULL DEFAULT 'FERMENTER',
-                capacity_liters DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-                is_clean TINYINT(1) NOT NULL DEFAULT 1,
-                is_occupied TINYINT(1) NOT NULL DEFAULT 0,
-                datec DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                tms DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                CONSTRAINT uk_brew_vessel_ref UNIQUE (entity, ref)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
-
-            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_qc_log (
-                rowid INT AUTO_INCREMENT PRIMARY KEY,
-                fk_brew_session INT NOT NULL,
-                measurement_type VARCHAR(32) NOT NULL,
-                val DECIMAL(10,4) NOT NULL,
-                unit VARCHAR(16) NOT NULL,
-                recorded_by VARCHAR(128) NOT NULL,
-                recorded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
-
-            "CREATE TABLE IF NOT EXISTS " . MAIN_DB_PREFIX . "brew_container (
-                rowid INT AUTO_INCREMENT PRIMARY KEY,
-                entity INT NOT NULL DEFAULT 1,
-                barcode VARCHAR(128) NOT NULL,
-                container_type VARCHAR(32) NOT NULL DEFAULT 'KEG_30L',
-                status VARCHAR(32) NOT NULL DEFAULT 'IN_BREWERY',
-                current_location VARCHAR(255) NULL,
-                thirdparty_id INT NULL,
-                last_scanned_at DATETIME NULL,
-                datec DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                tms DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                CONSTRAINT uk_brew_container_barcode UNIQUE (entity, barcode)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
-        );
-
-        return $this->_init($sql, $options);
+        return 1;
     }
 
     public function remove($options = '')
     {
-        $sql = array();
-        return $this->_remove($sql, $options);
+        $this->_remove(array(), $options);
+
+        dolibarr_del_const($this->db, "MAIN_MODULE_BREWMO", 0);
+        dolibarr_del_const($this->db, "MAIN_MODULE_BREWMO_VERSION", 0);
+
+        return 1;
     }
 }
