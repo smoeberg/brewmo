@@ -16,6 +16,7 @@ class modBrewmo extends DolibarrModules
         $this->db = $db;
         $this->modo_id = 500000;
         $this->name = 'Brewmo';
+        $this->name_alias = 'BrewMo 2.0';
         $this->description = 'BrewMo - Brewery Management & Manufacturing Execution System for Dolibarr';
         $this->version = '2.0.0';
         $this->family = 'other';

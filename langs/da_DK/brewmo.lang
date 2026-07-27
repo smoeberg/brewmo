@@ -1,18 +1,11 @@
-# brewmo.lang (da_DK)
-Brewery=Bryggeri
-BreweryDashboard=Bryggeri overblik
-Recipes=Opskrifter
-New=Ny
-Open=Åbn
-RecipeBuilder=Opskrift-bygger
-BrewSessions=Brygsessioner
-BrewSession=Brygsession
-Packaging=Pakning
-BrewmoSetup=Brewmo opsætning
-BatchVolume=Batch-volumen
-Overview=Overblik
-CreateFromRecipe=Opret fra opskrift
-CreateBrewSession=Opret brygsession
-Note=Note
-Start=Start
-Finish=Afslut
+# BrewMo Language File - da_DK
+ModuleBrewmoName = BrewMo 2.0
+Module500000Name = BrewMo 2.0
+ModuleBrewmoDesc = BrewMo - Bryggeri Styring & Produktionsstyring (MES) for Dolibarr
+Module500000Desc = BrewMo - Bryggeri Styring & Produktionsstyring (MES) for Dolibarr
+BrewmoSetup = BrewMo Opsætning
+BrewSessions = Brygsessioner
+Recipes = Opskrifter
+Tanks = Tanke / Beholdere
+MRP = MRP Beregning
+PackagingLabels = Emballage Etiketter

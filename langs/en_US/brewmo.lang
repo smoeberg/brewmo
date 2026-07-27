@@ -1,18 +1,11 @@
-# brewmo.lang (en_US)
-Brewery=Brewery
-BreweryDashboard=Brewery dashboard
-Recipes=Recipes
-New=New
-Open=Open
-RecipeBuilder=Recipe builder
-BrewSessions=Brew sessions
-BrewSession=Brew session
-Packaging=Packaging
-BrewmoSetup=Brewmo setup
-BatchVolume=Batch volume
-Overview=Overview
-CreateFromRecipe=Create from recipe
-CreateBrewSession=Create brew session
-Note=Note
-Start=Start
-Finish=Finish
+# BrewMo Language File - en_US
+ModuleBrewmoName = BrewMo 2.0
+Module500000Name = BrewMo 2.0
+ModuleBrewmoDesc = BrewMo - Brewery Management & Manufacturing Execution System for Dolibarr
+Module500000Desc = BrewMo - Brewery Management & Manufacturing Execution System for Dolibarr
+BrewmoSetup = BrewMo Setup
+BrewSessions = Brew Sessions
+Recipes = Recipes
+Tanks = Tanks / Vessels
+MRP = MRP Calculation
+PackagingLabels = Packaging Labels
