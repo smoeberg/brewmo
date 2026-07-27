@@ -171,11 +171,26 @@ class modBrewmo extends DolibarrModules
 
         // Populate Dolibarr Dictionary "Type of resources" (llx_c_type_resource)
         $resourceTypes = array(
-            array('code' => 'RES_BREW_MASHTUN',    'label' => 'Mæskekar (Mash Tun)',         'type' => 'brewmo'),
-            array('code' => 'RES_BREW_KETTLE',     'label' => 'Brygkedel (Brew Kettle)',      'type' => 'brewmo'),
-            array('code' => 'RES_BREW_FERMENTER',  'label' => 'Gæringstank (Fermenter/CCT)',  'type' => 'brewmo'),
-            array('code' => 'RES_BREW_BRITETANK',  'label' => 'Lagertank (Brite Tank/BBT)',   'type' => 'brewmo'),
-            array('code' => 'RES_BREW_SERVINGTANK','label' => 'Udskænkningstank (Serving)',  'type' => 'brewmo')
+            array('code' => 'RES_BREW_MASHTUN',         'label' => 'Mæskekar (Mash Tun)'),
+            array('code' => 'RES_BREW_LAUTER',          'label' => 'Si-kar (Lauter Tun)'),
+            array('code' => 'RES_BREW_KETTLE',          'label' => 'Brygkedel (Brew Kettle)'),
+            array('code' => 'RES_BREW_WHIRLPOOL',       'label' => 'Whirlpool'),
+            array('code' => 'RES_BREW_COMBIBREWHOUSE',  'label' => 'Kombi-bryghus (Combi Brewhouse)'),
+            array('code' => 'RES_BREW_FERMENTER',       'label' => 'Gæringstank / CCT (Fermenter)'),
+            array('code' => 'RES_BREW_BRITETANK',       'label' => 'Lagertank / BBT (Brite Beer Tank)'),
+            array('code' => 'RES_BREW_SERVINGTANK',     'label' => 'Udskænkningstank (Serving Tank)'),
+            array('code' => 'RES_BREW_OPENFERMENTER',   'label' => 'Åbent gæringskar (Open Fermenter)'),
+            array('code' => 'RES_BREW_HORIZONTALTANK',  'label' => 'Horisontal lagertank (Lager Tank)'),
+            array('code' => 'RES_BREW_BOTTLINGLINE',    'label' => 'Flaskefyldelinje (Bottling Line)'),
+            array('code' => 'RES_BREW_CANNINGLINE',     'label' => 'Dåsefyldelinje (Canning Line)'),
+            array('code' => 'RES_BREW_KEGFILLER',       'label' => 'Fustagefylder (Keg Washer & Filler)'),
+            array('code' => 'RES_BREW_LABELER',         'label' => 'Etiketteringsmaskine (Labeler)'),
+            array('code' => 'RES_BREW_PACKAGER',        'label' => 'Kartonpakker / Pakkelinje (Case Packer)'),
+            array('code' => 'RES_BREW_CIPSTATION',      'label' => 'CIP-anlæg / Rengøringsstation (CIP System)'),
+            array('code' => 'RES_BREW_GRAINMILL',       'label' => 'Valsestol / Maltkværn (Grain Mill)'),
+            array('code' => 'RES_BREW_PASTEURIZER',     'label' => 'Pasteuriseringsanlæg (Pasteurizer)'),
+            array('code' => 'RES_BREW_FILTER',          'label' => 'Filtreringsanlæg (Beer Filter)'),
+            array('code' => 'RES_BREW_IOTSENSOR',       'label' => 'IoT / Densitet- & Temperatursensor')
         );
 
         foreach ($resourceTypes as $rt) {
