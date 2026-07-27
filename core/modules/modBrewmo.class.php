@@ -169,7 +169,25 @@ class modBrewmo extends DolibarrModules
     {
         $this->_init(array(), $options);
 
-        // Explicitly enable module constant in Dolibarr conf
+        // Populate Dolibarr Dictionary "Type of resources" (llx_c_type_resource)
+        $resourceTypes = array(
+            array('code' => 'RES_BREW_MASHTUN',    'label' => 'Mæskekar (Mash Tun)',         'type' => 'brewmo'),
+            array('code' => 'RES_BREW_KETTLE',     'label' => 'Brygkedel (Brew Kettle)',      'type' => 'brewmo'),
+            array('code' => 'RES_BREW_FERMENTER',  'label' => 'Gæringstank (Fermenter/CCT)',  'type' => 'brewmo'),
+            array('code' => 'RES_BREW_BRITETANK',  'label' => 'Lagertank (Brite Tank/BBT)',   'type' => 'brewmo'),
+            array('code' => 'RES_BREW_SERVINGTANK','label' => 'Udskænkningstank (Serving)',  'type' => 'brewmo')
+        );
+
+        foreach ($resourceTypes as $rt) {
+            $checkSql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "c_type_resource WHERE code = '" . $this->db->escape($rt['code']) . "'";
+            $resql = $this->db->query($checkSql);
+            if ($resql && $this->db->num_rows($resql) == 0) {
+                $insertSql = "INSERT INTO " . MAIN_DB_PREFIX . "c_type_resource (code, label, active) VALUES ('" . $this->db->escape($rt['code']) . "', '" . $this->db->escape($rt['label']) . "', 1)";
+                $this->db->query($insertSql);
+            }
+        }
+
+        // Explicitly enable module constants
         dolibarr_set_const($this->db, "MAIN_MODULE_BREWMO", "1", 'chaine', 0, '', 0);
         dolibarr_set_const($this->db, "MAIN_MODULE_BREWMO_VERSION", $this->version, 'chaine', 0, '', 0);
 
