@@ -1,86 +1,117 @@
 <?php
+/**
+ * BrewMo 2.0 - Tank / Vessel Card (Integrated with Dolibarr Workstations & Warehouses)
+ */
+
+// Load Dolibarr environment
 $res = 0;
 $paths = array(
-    __DIR__ . '/../../main.inc.php',
-    __DIR__ . '/../../../main.inc.php',
-    __DIR__ . '/../../../../main.inc.php'
+    __DIR__ . '/../../../../main.inc.php',
+    __DIR__ . '/../../../../../main.inc.php',
+    __DIR__ . '/../../main.inc.php'
 );
-foreach ($paths as $p) { if (!$res && file_exists($p)) { $res = @include $p; } }
-if (!$res) { die('Include of main.inc.php failed'); }
-
-$_GET['mainmenu']  = 'brewmo';
-$_GET['leftmenu']  = 'brewmo_tanks';
-
-dol_include_once('/brewmo/class/brewtank.class.php');
-
-$langs->load('brewmo@brewmo');
-if (empty($user->rights->brewmo->read)) accessforbidden();
-
-$action = GETPOST('action', 'alpha');
-$id     = GETPOSTINT('id');
-
-$object = new BrewTank($db);
-
-if ($id > 0) {
-    $object->fetch($id);
-}
-
-if ($action == 'save' && $user->rights->brewmo->write) {
-    $object->ref          = GETPOST('ref', 'alphanohtml');
-    $object->label        = GETPOST('label', 'alphanohtml');
-    $object->capacity_l   = (float) GETPOST('capacity_l', 'alpha');
-    $object->tank_type    = GETPOST('tank_type', 'alphanohtml');
-    $object->location     = GETPOST('location', 'alphanohtml');
-    $object->is_active    = GETPOSTINT('is_active') ? 1 : 0;
-    $object->note_public  = GETPOST('note_public', 'restricthtml');
-    $object->note_private = GETPOST('note_private', 'restricthtml');
-
-    if ($object->id > 0) {
-        $sql = "UPDATE ".$db->prefix().$object->table_element." SET ";
-        $sql.= "ref='".$db->escape($object->ref)."',";
-        $sql.= "label='".$db->escape($object->label)."',";
-        $sql.= "capacity_l=".(float)$object->capacity_l.",";
-        $sql.= "tank_type='".$db->escape($object->tank_type)."',";
-        $sql.= "location='".$db->escape($object->location)."',";
-        $sql.= "is_active=".(int)$object->is_active.",";
-        $sql.= "note_public='".$db->escape($object->note_public)."',";
-        $sql.= "note_private='".$db->escape($object->note_private)."'";
-        $sql.= " WHERE rowid=".(int)$object->id;
-        $db->query($sql);
-    } else {
-        $object->create($user);
+foreach ($paths as $p) {
+    if (!$res && file_exists($p)) {
+        $res = @include $p;
     }
-
-    header('Location: '.dol_buildpath('/brewmo/www/tank_list.php', 1));
-    exit;
 }
 
-llxHeader('', $langs->trans("BrewmoTank"));
-
-if ($object->id > 0) {
-    print load_fiche_titre($langs->trans("BrewmoTank").' '.$object->ref);
-} else {
-    print load_fiche_titre($langs->trans("NewBrewmoTank"));
+if (!$res) {
+    die("Error: Dolibarr environment initialization failed.");
 }
 
-print '<form method="POST">';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
+$action = GETPOST('action', 'aZ09');
+$id     = GETPOST('id', 'int');
+
+llxHeader('', 'BrewMo Tank / Vessel Management');
+
+print load_fiche_titre('BrewMo - Tank / Vessel Management', '', 'object_generic');
+
+// Tank Types Mapping
+$vesselTypes = array(
+    'MASH_TUN'     => 'Mash Tun (Mæskekar)',
+    'BREW_KETTLE'  => 'Brew Kettle (Brygkedel)',
+    'FERMENTER'    => 'Fermenter / CCT (Gæringstank)',
+    'BRITE_TANK'   => 'Brite Tank / BBT (Lagertank)',
+    'SERVING_TANK' => 'Serving Tank (Udskænkningstank)'
+);
+
+// Fetch Dolibarr Workstations (llx_workstation) for integration
+$workstations = array();
+$sql = "SELECT rowid, ref, name FROM " . MAIN_DB_PREFIX . "workstation WHERE status = 1";
+$resql = $db->query($sql);
+if ($resql) {
+    while ($obj = $db->fetch_object($resql)) {
+        $workstations[$obj->rowid] = $obj->ref . ' - ' . $obj->name;
+    }
+}
+
+// Fetch Dolibarr Warehouses / Locations (llx_entrepot)
+$warehouses = array();
+$sql = "SELECT rowid, ref, lieu FROM " . MAIN_DB_PREFIX . "entrepot WHERE statut = 1";
+$resql = $db->query($sql);
+if ($resql) {
+    while ($obj = $db->fetch_object($resql)) {
+        $warehouses[$obj->rowid] = $obj->ref . ($obj->lieu ? ' (' . $obj->lieu . ')' : '');
+    }
+}
+
+print '<form action="' . $_SERVER["PHP_SELF"] . '" method="POST">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="save">';
-if ($object->id > 0) {
-    print '<input type="hidden" name="id" value="'.(int)$object->id.'">';
-}
+
 print '<table class="border centpercent">';
-print '<tr><td class="fieldrequired">'.$langs->trans("Ref").'</td><td><input type="text" class="flat" name="ref" value="'.dol_escape_htmltag($object->ref).'"></td></tr>';
-print '<tr><td>'.$langs->trans("Label").'</td><td><input type="text" class="flat" name="label" value="'.dol_escape_htmltag($object->label).'"></td></tr>';
-print '<tr><td>'.$langs->trans("Capacity").'</td><td><input type="text" class="flat" name="capacity_l" value="'.dol_escape_htmltag($object->capacity_l).'"> L</td></tr>';
-print '<tr><td>'.$langs->trans("Type").'</td><td><input type="text" class="flat" name="tank_type" value="'.dol_escape_htmltag($object->tank_type).'"></td></tr>';
-print '<tr><td>'.$langs->trans("Location").'</td><td><input type="text" class="flat" name="location" value="'.dol_escape_htmltag($object->location).'"></td></tr>';
-print '<tr><td>'.$langs->trans("Status").'</td><td><input type="checkbox" name="is_active" value="1" '.($object->is_active?'checked':'').'> '.$langs->trans("Active").'</td></tr>';
-print '<tr><td>'.$langs->trans("Note").'</td><td><textarea class="flat" name="note_public" rows="3">'.dol_escape_htmltag($object->note_public).'</textarea></td></tr>';
-print '<tr><td>'.$langs->trans("NotePrivate").'</td><td><textarea class="flat" name="note_private" rows="3">'.dol_escape_htmltag($object->note_private).'</textarea></td></tr>';
+print '<tr><td class="titlefield required">Ref / Code</td><td><input type="text" name="ref" value="TANK-001" required></td></tr>';
+print '<tr><td class="required">Name / Label</td><td><input type="text" name="name" value="Fermenter #1" required></td></tr>';
+
+// Vessel Type Dropdown
+print '<tr><td class="required">Vessel Type (Tanktype)</td><td>';
+print '<select name="type" class="flat">';
+foreach ($vesselTypes as $key => $label) {
+    print '<option value="' . $key . '">' . $label . '</option>';
+}
+print '</select>';
+print '</td></tr>';
+
+// Capacity
+print '<tr><td class="required">Capacity (Kapacitet)</td><td><input type="number" step="0.01" name="capacity_liters" value="1000.00"> Liters</td></tr>';
+
+// Dolibarr Workstation Link
+print '<tr><td>Dolibarr Workstation (Arbejdsstation)</td><td>';
+if (!empty($workstations)) {
+    print '<select name="fk_workstation" class="flat">';
+    print '<option value="0">-- Select Dolibarr Workstation --</option>';
+    foreach ($workstations as $wsId => $wsLabel) {
+        print '<option value="' . $wsId . '">' . dol_escape_htmltag($wsLabel) . '</option>';
+    }
+    print '</select>';
+} else {
+    print '<span class="opacitymedium">No Workstations found in Dolibarr MRP module.</span>';
+}
+print '</td></tr>';
+
+// Dolibarr Warehouse / Location Link
+print '<tr><td>Dolibarr Warehouse / Location (Lager)</td><td>';
+if (!empty($warehouses)) {
+    print '<select name="fk_entrepot" class="flat">';
+    print '<option value="0">-- Select Dolibarr Warehouse --</option>';
+    foreach ($warehouses as $whId => $whLabel) {
+        print '<option value="' . $whId . '">' . dol_escape_htmltag($whLabel) . '</option>';
+    }
+    print '</select>';
+} else {
+    print '<span class="opacitymedium">No Warehouses found in Dolibarr.</span>';
+}
+print '</td></tr>';
+
+print '<tr><td>Status</td><td><label><input type="checkbox" name="is_clean" value="1" checked> CIP Clean & Ready</label></td></tr>';
 print '</table>';
 
-print '<div class="center"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div>';
-
+print '<div class="center" style="margin-top: 15px;">';
+print '<input type="submit" class="button" value="Save Tank / Vessel">';
+print '</div>';
 print '</form>';
 
 llxFooter();
